@@ -1,0 +1,345 @@
+
+<h2 class="sr-only">Lead Spring CRM Dashboard 2026 — interactive lead prioritisation tool with market segment analysis, scoring engine, and marketing ROI comparison.</h2>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.app{display:grid;grid-template-columns:200px 1fr;min-height:660px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;font-size:13px}
+.sidebar{background:#0F3460;padding:1.2rem 1rem;display:flex;flex-direction:column;gap:4px}
+.logo{margin-bottom:1rem;padding-bottom:.75rem;border-bottom:0.5px solid rgba(255,255,255,.12)}
+.logo-name{color:white;font-size:14px;font-weight:500;display:block}
+.logo-sub{color:#7BAFD4;font-size:11px;display:block;margin-top:2px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--border-radius-md);cursor:pointer;color:rgba(255,255,255,.6);font-size:12px;transition:background .15s}
+.nav-item:hover,.nav-item.active{background:rgba(43,188,212,.2);color:#7BAFD4}
+.nav-item i{font-size:16px}
+.main{background:var(--color-background-secondary);display:flex;flex-direction:column}
+.topbar{background:#0F3460;padding:.75rem 1.2rem;display:flex;align-items:center;justify-content:space-between}
+.topbar-title{font-size:15px;font-weight:500;color:white}
+.topbar-year{font-size:11px;color:#7BAFD4}
+.content{padding:1rem;display:flex;flex-direction:column;gap:.75rem;flex:1}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kpi{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:.75rem .9rem}
+.kpi-label{font-size:10px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.kpi-val{font-size:20px;font-weight:500;color:var(--color-text-primary)}
+.kpi-sub{font-size:10px;color:var(--color-text-secondary);margin-top:1px}
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.panel{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:.9rem;display:flex;flex-direction:column;gap:8px}
+.panel-title{font-size:12px;font-weight:500;color:var(--color-text-primary);display:flex;align-items:center;gap:6px;margin-bottom:2px}
+.panel-title i{font-size:15px;color:#2BBCD4}
+.frow{display:flex;flex-direction:column;gap:3px}
+.frow label{font-size:11px;color:var(--color-text-secondary)}
+.frow select,.frow input{font-size:12px;width:100%;padding:5px 8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)}
+.score-box{border-radius:var(--border-radius-md);padding:.75rem .9rem;margin-top:2px}
+.score-high{background:#E1F5EE;border:0.5px solid #1D9E75}
+.score-med{background:#FAEEDA;border:0.5px solid #EF9F27}
+.score-low{background:#FCEBEB;border:0.5px solid #E24B4A}
+.score-none{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary)}
+.score-lbl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+.score-num{font-size:28px;font-weight:500;margin:2px 0}
+.score-act{font-size:11px}
+.pkg-box{background:#E8F8FB;border-radius:var(--border-radius-md);padding:.65rem .8rem;font-size:11px;color:#0F3460;margin-top:2px;border-left:3px solid #2BBCD4;border-radius:0}
+.msg-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.65rem .8rem;font-size:11px;color:var(--color-text-secondary);line-height:1.5;border-left:3px solid #2BBCD4;border-radius:0;margin-top:2px}
+.calc-btn{background:#0F3460;color:white;border:none;border-radius:var(--border-radius-md);padding:8px 14px;font-size:12px;cursor:pointer;width:100%;margin-top:4px;font-weight:500}
+.calc-btn:hover{background:#2BBCD4}
+.tab-bar{display:flex;gap:4px;border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:6px}
+.tab{font-size:11px;padding:4px 10px;border-radius:var(--border-radius-md);cursor:pointer;color:var(--color-text-secondary);border:none;background:none}
+.tab.on{background:var(--color-background-secondary);color:var(--color-text-primary);font-weight:500}
+.tp{display:none;flex-direction:column;gap:8px}
+.tp.on{display:flex}
+.bar-row{display:flex;align-items:center;gap:6px}
+.bar-lbl{font-size:10px;color:var(--color-text-secondary);width:112px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{flex:1;height:9px;background:var(--color-background-secondary);border-radius:5px;overflow:hidden}
+.bar-fill{height:100%;border-radius:5px}
+.bar-val{font-size:10px;color:var(--color-text-secondary);width:36px;text-align:right}
+.seg-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:11px}
+.seg-row:last-child{border-bottom:none}
+.pri{font-size:9px;padding:2px 8px;border-radius:10px;font-weight:500}
+.p1{background:#E1F5EE;color:#085041}
+.p2{background:#E8F8FB;color:#0F3460}
+.p3{background:#FAEEDA;color:#633806}
+.p4{background:#F1EFE8;color:#444441}
+.run-btn{background:#1D9E75;color:white;border:none;border-radius:var(--border-radius-md);padding:7px 14px;font-size:12px;cursor:pointer;width:100%;font-weight:500}
+.run-btn:hover{background:#0F6E56}
+.ch-row{display:flex;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:11px;gap:4px}
+.ch-row:last-child{border-bottom:none}
+.swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sw{border-radius:var(--border-radius-md);padding:8px 10px;font-size:10px;line-height:1.5}
+.sw strong{display:block;font-size:11px;font-weight:500;margin-bottom:3px}
+.ss{background:#E1F5EE;color:#085041}
+.sw2{background:#E8F8FB;color:#0F3460}
+.so{background:#FAEEDA;color:#633806}
+.st{background:#FCEBEB;color:#A32D2D}
+</style>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="logo">
+      <span class="logo-name">Lead Spring CRM</span>
+      <span class="logo-sub">Dashboard 2026</span>
+    </div>
+    <div class="nav-item active"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>Dashboard</div>
+    <div class="nav-item"><i class="ti ti-target" aria-hidden="true"></i>Lead scorer</div>
+    <div class="nav-item"><i class="ti ti-chart-bar" aria-hidden="true"></i>Market segments</div>
+    <div class="nav-item"><i class="ti ti-building" aria-hidden="true"></i>Competitors</div>
+    <div class="nav-item"><i class="ti ti-chart-pie" aria-hidden="true"></i>Marketing ROI</div>
+    <div class="nav-item"><i class="ti ti-file-text" aria-hidden="true"></i>Reports</div>
+    <div style="flex:1"></div>
+    <div class="nav-item"><i class="ti ti-settings" aria-hidden="true"></i>Settings</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Lead Spring CRM Dashboard</div>
+        <div class="topbar-year">2026</div>
+      </div>
+      <span style="font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(43,188,212,.2);color:#7BAFD4;font-weight:500">Prototype v1.0</span>
+    </div>
+
+    <div class="content">
+
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="kpi-label">WA businesses</div>
+          <div class="kpi-val">266,273</div>
+          <div class="kpi-sub">+4.3% fastest in AU</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">New entries 2024-25</div>
+          <div class="kpi-val">43,723</div>
+          <div class="kpi-sub">119 new businesses/day</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">4-year survival</div>
+          <div class="kpi-val">64.1%</div>
+          <div class="kpi-sub">35.9% fail — CRM helps</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">CRM ROI</div>
+          <div class="kpi-val">$8.71</div>
+          <div class="kpi-sub">per $1 invested</div>
+        </div>
+      </div>
+
+      <div class="panels">
+
+        <div class="panel">
+          <div class="panel-title"><i class="ti ti-target" aria-hidden="true"></i>Lead scorer</div>
+
+          <div class="frow">
+            <label>Business type</label>
+            <select id="seg">
+              <option value="">— select segment —</option>
+              <option value="prof">Professional Services</option>
+              <option value="fin">Financial Services</option>
+              <option value="health">Health &amp; Wellness</option>
+              <option value="trade">Construction &amp; Trades</option>
+              <option value="other">Other industry</option>
+            </select>
+          </div>
+          <div class="frow">
+            <label>Number of employees</label>
+            <input type="number" id="emp" min="1" max="200" placeholder="e.g. 8" />
+          </div>
+          <div class="frow">
+            <label>Days since enquiry</label>
+            <input type="number" id="days" min="0" max="365" placeholder="e.g. 2" />
+          </div>
+          <div class="frow">
+            <label>Main pain point</label>
+            <select id="pain">
+              <option value="">— select pain point —</option>
+              <option value="leads">Missing / losing leads</option>
+              <option value="followup">No follow-up system</option>
+              <option value="manual">Too much manual admin</option>
+              <option value="nocrm">No CRM at all</option>
+              <option value="pipeline">Poor pipeline visibility</option>
+            </select>
+          </div>
+          <div class="frow">
+            <label>Current tools</label>
+            <select id="tools">
+              <option value="none">None — spreadsheet or memory</option>
+              <option value="partial">Email + basic spreadsheet</option>
+              <option value="trial">Trying a free CRM trial</option>
+              <option value="crm">Has CRM but not configured</option>
+            </select>
+          </div>
+
+          <button class="calc-btn" onclick="scoreLead()">Score this lead ↗</button>
+
+          <div id="rbox" class="score-box score-none">
+            <div class="score-lbl" style="color:var(--color-text-secondary)">Enter details above and click score</div>
+          </div>
+          <div id="pbox" style="display:none" class="pkg-box"></div>
+          <div id="mbox" style="display:none" class="msg-box"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title"><i class="ti ti-chart-bar" aria-hidden="true"></i>Market analysis</div>
+
+          <div class="tab-bar">
+            <button class="tab on" onclick="tab(this,'seg')">Segments</button>
+            <button class="tab" onclick="tab(this,'roi')">Marketing ROI</button>
+            <button class="tab" onclick="tab(this,'swot')">SWOT</button>
+            <button class="tab" onclick="tab(this,'growth')">Growth</button>
+          </div>
+
+          <div id="tp-seg" class="tp on">
+            <div style="font-size:10px;color:var(--color-text-secondary)">WA small businesses by segment — ABS Cube 2 2024-25</div>
+            <div class="bar-row"><span class="bar-lbl">Construction & Trades</span><div class="bar-track"><div class="bar-fill" style="width:85%;background:#2BBCD4"></div></div><span class="bar-val">41,811</span></div>
+            <div class="bar-row"><span class="bar-lbl">Professional Services</span><div class="bar-track"><div class="bar-fill" style="width:40%;background:#0F3460"></div></div><span class="bar-val">19,671</span></div>
+            <div class="bar-row"><span class="bar-lbl">Health & Wellness</span><div class="bar-track"><div class="bar-fill" style="width:35%;background:#1D9E75"></div></div><span class="bar-val">17,033</span></div>
+            <div class="bar-row"><span class="bar-lbl">Financial Services</span><div class="bar-track"><div class="bar-fill" style="width:17%;background:#EF9F27"></div></div><span class="bar-val">8,408</span></div>
+            <div style="font-size:10px;color:var(--color-text-secondary);margin-top:4px">Lead Spring priority ranking</div>
+            <div class="seg-row"><span style="color:var(--color-text-primary);font-weight:500">Professional Services</span><span style="color:var(--color-text-secondary)">24.1% Perth CBD</span><span class="pri p1">#1</span></div>
+            <div class="seg-row"><span style="color:var(--color-text-primary);font-weight:500">Financial Services</span><span style="color:var(--color-text-secondary)">+3.7% growth</span><span class="pri p2">#2</span></div>
+            <div class="seg-row"><span style="color:var(--color-text-primary);font-weight:500">Health & Wellness</span><span style="color:var(--color-text-secondary)">+6.6% fastest</span><span class="pri p3">#3</span></div>
+            <div class="seg-row"><span style="color:var(--color-text-primary);font-weight:500">Construction & Trades</span><span style="color:var(--color-text-secondary)">Largest volume</span><span class="pri p4">#4</span></div>
+            <button class="run-btn" onclick="sendPrompt('Which Lead Spring CRM segment should Ross target first and why?')">Explore insights ↗</button>
+          </div>
+
+          <div id="tp-roi" class="tp">
+            <div style="font-size:10px;color:var(--color-text-secondary)">Marketing channel ROI comparison</div>
+            <div style="display:flex;gap:4px;font-size:9px;color:var(--color-text-secondary);padding-bottom:4px;border-bottom:0.5px solid var(--color-border-tertiary)">
+              <span style="flex:2;font-weight:500">Channel</span>
+              <span style="flex:2">Monthly cost</span>
+              <span style="flex:1;text-align:center">Leads</span>
+              <span style="flex:1;text-align:right">ROI</span>
+            </div>
+            <div class="ch-row"><span style="flex:2;font-weight:500;color:var(--color-text-primary)">Referral program</span><span style="flex:2;color:var(--color-text-secondary)">$0/month</span><span style="flex:1;text-align:center;color:var(--color-text-secondary)">3-10</span><span style="flex:1;text-align:right;color:#085041;font-weight:500">Highest</span></div>
+            <div class="ch-row"><span style="flex:2;font-weight:500;color:var(--color-text-primary)">Email (AI)</span><span style="flex:2;color:var(--color-text-secondary)">$50-$200</span><span style="flex:1;text-align:center;color:var(--color-text-secondary)">2-8</span><span style="flex:1;text-align:right;color:#085041;font-weight:500">Very high</span></div>
+            <div class="ch-row"><span style="flex:2;font-weight:500;color:var(--color-text-primary)">Google Ads</span><span style="flex:2;color:var(--color-text-secondary)">$500-$1,500</span><span style="flex:1;text-align:center;color:var(--color-text-secondary)">10-20</span><span style="flex:1;text-align:right;color:#085041;font-weight:500">High</span></div>
+            <div class="ch-row"><span style="flex:2;font-weight:500;color:var(--color-text-primary)">Facebook / Instagram</span><span style="flex:2;color:var(--color-text-secondary)">$300-$800</span><span style="flex:1;text-align:center;color:var(--color-text-secondary)">8-20</span><span style="flex:1;text-align:right;color:#633806;font-weight:500">Medium</span></div>
+            <div class="ch-row"><span style="flex:2;font-weight:500;color:var(--color-text-primary)">LinkedIn Ads</span><span style="flex:2;color:var(--color-text-secondary)">$500-$1,000</span><span style="flex:1;text-align:center;color:var(--color-text-secondary)">5-15</span><span style="flex:1;text-align:right;color:#633806;font-weight:500">Medium</span></div>
+            <div class="ch-row"><span style="flex:2;font-weight:500;color:var(--color-text-primary)">Physical media</span><span style="flex:2;color:var(--color-text-secondary)">$500-$1,500</span><span style="flex:1;text-align:center;color:var(--color-text-secondary)">2-5</span><span style="flex:1;text-align:right;color:#A32D2D;font-weight:500">Low</span></div>
+            <div style="background:#E1F5EE;border-radius:var(--border-radius-md);padding:7px 10px;font-size:10px;color:#085041;margin-top:2px">
+              <strong style="font-size:11px">Recommended: AI + Human Mix</strong><br>
+              $300-$800/month · ~$14,000/month revenue at Month 3
+            </div>
+          </div>
+
+          <div id="tp-swot" class="tp">
+            <div style="font-size:10px;color:var(--color-text-secondary)">SWOT analysis — Lead Spring CRM</div>
+            <div class="swot-grid">
+              <div class="sw ss"><strong>Strengths</strong>20+ yrs experience · AI-enabled · 30-day delivery · Perth-specific · $600 entry point</div>
+              <div class="sw sw2"><strong>Weaknesses</strong>New brand · No portfolio yet · Solo capacity · Zero brand awareness</div>
+              <div class="sw so"><strong>Opportunities</strong>43,723 new WA businesses/yr · 74% SMEs have no CRM · No direct Perth competitor</div>
+              <div class="sw st"><strong>Threats</strong>Free DIY platforms · Large agencies entering SME · Offshore consultants</div>
+            </div>
+            <button class="run-btn" onclick="sendPrompt('What should Lead Spring CRM do about the threats in their SWOT analysis?')" style="margin-top:4px">Analyse SWOT ↗</button>
+          </div>
+
+          <div id="tp-growth" class="tp">
+            <div style="font-size:10px;color:var(--color-text-secondary)">WA industry growth rates 2024-25 — ABS CABEE</div>
+            <div class="bar-row"><span class="bar-lbl">Health Care</span><div class="bar-track"><div class="bar-fill" style="width:99%;background:#1D9E75"></div></div><span class="bar-val" style="color:#085041">+6.6%</span></div>
+            <div class="bar-row"><span class="bar-lbl">Transport & Post</span><div class="bar-track"><div class="bar-fill" style="width:77%;background:#B4B2A9"></div></div><span class="bar-val">+5.1%</span></div>
+            <div class="bar-row"><span class="bar-lbl">Financial Services</span><div class="bar-track"><div class="bar-fill" style="width:56%;background:#EF9F27"></div></div><span class="bar-val" style="color:#633806">+3.7%</span></div>
+            <div class="bar-row"><span class="bar-lbl">Prof Services</span><div class="bar-track"><div class="bar-fill" style="width:38%;background:#0F3460"></div></div><span class="bar-val">+2.5%</span></div>
+            <div class="bar-row"><span class="bar-lbl">Construction</span><div class="bar-track"><div class="bar-fill" style="width:33%;background:#2BBCD4"></div></div><span class="bar-val">+2.2%</span></div>
+            <div class="bar-row"><span class="bar-lbl">Retail Trade</span><div class="bar-track"><div class="bar-fill" style="width:6%;background:#E24B4A"></div></div><span class="bar-val" style="color:#A32D2D">-0.4%</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">
+              <div style="background:#E1F5EE;border-radius:var(--border-radius-md);padding:7px 10px;font-size:10px;color:#085041;text-align:center"><div style="font-size:16px;font-weight:500">43,723</div>New entries 2024-25</div>
+              <div style="background:#FCEBEB;border-radius:var(--border-radius-md);padding:7px 10px;font-size:10px;color:#A32D2D;text-align:center"><div style="font-size:16px;font-weight:500">33,190</div>Exits 2024-25</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:.9rem">
+        <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+          <i class="ti ti-chart-bubble" style="font-size:15px;color:#2BBCD4" aria-hidden="true"></i>
+          K-Means customer segment priority matrix — digital readiness vs strategic fit (bubble size = WA market size)
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap">
+          <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--color-text-secondary)"><span style="width:10px;height:10px;border-radius:50%;background:#0F3460;display:inline-block"></span>Professional Services</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--color-text-secondary)"><span style="width:10px;height:10px;border-radius:50%;background:#EF9F27;display:inline-block"></span>Financial Services</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--color-text-secondary)"><span style="width:10px;height:10px;border-radius:50%;background:#1D9E75;display:inline-block"></span>Health & Wellness</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--color-text-secondary)"><span style="width:10px;height:10px;border-radius:50%;background:#2BBCD4;display:inline-block"></span>Construction & Trades</span>
+        </div>
+        <div style="position:relative;height:180px">
+          <canvas id="bc" role="img" aria-label="Bubble chart showing 4 customer segments plotted by digital readiness versus strategic fit for Lead Spring CRM. Professional Services scores highest. Construction and Trades is largest bubble.">Segments: Professional Services readiness 8 fit 9; Financial Services readiness 8 fit 8; Health and Wellness readiness 6 fit 7; Construction and Trades readiness 4 fit 7.</canvas>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const SS={prof:0.90,fin:0.85,health:0.80,trade:0.70,other:0.40};
+const PS={leads:0.95,followup:0.95,manual:0.90,nocrm:0.90,pipeline:0.75};
+const MSG={
+  prof:"Hi [Name], I help Perth professionals set up CRM systems that follow up every lead automatically — so you never lose a deal to a slower competitor. Most clients go live in 30 days. Free strategy call this week?",
+  fin:"Hi [Name], I build CRM systems for Perth financial advisors that keep every lead warm automatically. No lead left behind. Book a free 30-min strategy call?",
+  health:"Hi [Name], I help Perth health practices fill their appointment books automatically — no more manual follow-up. Happy to show you how in 30 minutes.",
+  trade:"Hi [Name], I help Perth tradies set up simple CRM systems so leads get a response within minutes — even when you're on the job. Worth a quick chat?",
+  other:"Hi [Name], I help Perth small businesses automate their lead management and stop losing enquiries. Free strategy call this week?",
+};
+const PKG={
+  small:"Deep Dive Audit — $600 (best starting point for 1-2 person businesses)",
+  mid:"CRM Setup — from $2,000 + Deep Dive Audit $600",
+  large:"Growth System — from $2,000+ full CRM + automation",
+};
+
+function scoreLead(){
+  const seg=document.getElementById('seg').value;
+  const emp=parseInt(document.getElementById('emp').value)||0;
+  const days=parseInt(document.getElementById('days').value);
+  const pain=document.getElementById('pain').value;
+  const tools=document.getElementById('tools').value;
+  if(!seg||isNaN(days)||!pain){
+    document.getElementById('rbox').className='score-box score-none';
+    document.getElementById('rbox').innerHTML='<div class="score-lbl" style="color:var(--color-text-secondary)">Please fill in all fields</div>';
+    document.getElementById('pbox').style.display='none';
+    document.getElementById('mbox').style.display='none';
+    return;
+  }
+  const base=SS[seg]||0.40;
+  const ps=PS[pain]||0.50;
+  const rec=days<=1?1.0:days<=3?0.85:days<=7?0.65:days<=14?0.40:0.20;
+  const tb=tools==='none'?0.05:tools==='partial'?0.03:0.02;
+  const score=Math.min(Math.max((base*0.40+ps*0.35+rec*0.25)+tb,0),1);
+  const pct=Math.round(score*100);
+  const rb=document.getElementById('rbox');
+  let cls,lbl,act,lc,nc,ac;
+  if(score>=0.75){cls='score-high';lbl='HIGH PRIORITY';act='Follow up today — within 2 hours';lc='#085041';nc='#085041';ac='#0F6E56';}
+  else if(score>=0.55){cls='score-med';lbl='MEDIUM PRIORITY';act='Follow up this week';lc='#633806';nc='#633806';ac='#BA7517';}
+  else if(score>=0.35){cls='score-low';lbl='LOW PRIORITY';act='Add to email nurture sequence';lc='#791F1F';nc='#791F1F';ac='#A32D2D';}
+  else{cls='score-none';lbl='NOT QUALIFIED';act='Politely defer for now';lc='var(--color-text-secondary)';nc='var(--color-text-primary)';ac='var(--color-text-secondary)';}
+  rb.className='score-box '+cls;
+  rb.innerHTML=`<div class="score-lbl" style="color:${lc}">${lbl}</div><div class="score-num" style="color:${nc}">${pct}<span style="font-size:14px">/100</span></div><div class="score-act" style="color:${ac}">${act}</div>`;
+  const pkg=emp<=2?PKG.small:emp<=10?PKG.mid:PKG.large;
+  const pb=document.getElementById('pbox');
+  pb.style.display='block';
+  pb.innerHTML=`<strong style="font-size:11px">Recommended package:</strong><br>${pkg}`;
+  const mb=document.getElementById('mbox');
+  mb.style.display='block';
+  mb.innerHTML=`<strong style="font-size:11px;color:var(--color-text-primary)">Follow-up message:</strong><br><em>${MSG[seg]||MSG.other}</em>`;
+}
+
+function tab(el,id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tp').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('tp-'+id).classList.add('on');
+}
+
+new Chart(document.getElementById('bc'),{
+  type:'bubble',
+  data:{datasets:[
+    {label:'Professional Services',data:[{x:8,y:9,r:18}],backgroundColor:'rgba(15,52,96,0.75)',borderColor:'#0F3460'},
+    {label:'Financial Services',data:[{x:8,y:8,r:11}],backgroundColor:'rgba(239,159,39,0.75)',borderColor:'#EF9F27'},
+    {label:'Health & Wellness',data:[{x:6,y:7,r:16}],backgroundColor:'rgba(29,158,117,0.75)',borderColor:'#1D9E75'},
+    {label:'Construction & Trades',data:[{x:4,y:7,r:26}],backgroundColor:'rgba(43,188,212,0.65)',borderColor:'#2BBCD4'},
+  ]},
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: Readiness ${c.raw.x}/10 · Fit ${c.raw.y}/10`}}},
+    scales:{
+      x:{title:{display:true,text:'Digital readiness (1-10)',font:{size:10}},min:1,max:11,ticks:{font:{size:10}}},
+      y:{title:{display:true,text:'Strategic fit (1-10)',font:{size:10}},min:4,max:11,ticks:{font:{size:10}}},
+    }
+  }
+});
+</script>
