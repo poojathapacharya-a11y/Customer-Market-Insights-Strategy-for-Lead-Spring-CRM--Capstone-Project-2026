@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 170" role="img" aria-labelledby="title desc">
+  <title id="title">The Navigators logo</title>
+  <desc id="desc">Compass mark with The Navigators wordmark and guiding insight tagline.</desc>
+  <rect x="1.5" y="1.5" width="717" height="167" fill="#ffffff" stroke="#202020" stroke-width="3"/>
+  <rect x="22" y="17" width="178" height="136" rx="14" fill="#eefbf6"/>
+  <g transform="translate(111 85)">
+    <circle r="62" fill="none" stroke="#79d8be" stroke-width="1.5"/>
+    <circle r="48" fill="none" stroke="#9ce4d0" stroke-width="1.2"/>
+    <path d="M0,-62 L0,62 M-62,0 L62,0 M-44,-44 L44,44 M44,-44 L-44,44" stroke="#9ce4d0" stroke-width="1"/>
+    <text x="0" y="-68" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#0f4b43">N</text>
+    <text x="70" y="4" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#0f4b43">E</text>
+    <text x="0" y="77" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#0f4b43">S</text>
+    <text x="-70" y="4" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#0f4b43">W</text>
+    <path d="M0,-52 L12,-6 L52,0 L12,6 L0,52 L-12,6 L-52,0 L-12,-6 Z" fill="#134842" opacity="0.9"/>
+    <path d="M0,-42 L7,-4 L35,0 L7,4 L0,42 L-7,4 L-35,0 L-7,-4 Z" fill="#ffffff" opacity="0.85"/>
+    <circle r="13" fill="#083f39"/>
+    <circle r="7" fill="#eefbf6"/>
+    <circle r="3" fill="#63d4b4"/>
+  </g>
+  <g transform="translate(238 58)">
+    <text x="0" y="0" font-family="Arial, Helvetica, sans-serif" font-size="12" letter-spacing="3" fill="#54cfae">THE</text>
+    <text x="0" y="42" font-family="Arial, Helvetica, sans-serif" font-size="38" letter-spacing="2" fill="#0d463e">NAVIGATORS</text>
+    <line x1="0" y1="51" x2="448" y2="51" stroke="#bfeee1" stroke-width="2"/>
+    <text x="0" y="72" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#35b796">GUIDING INSIGHT. CHARTING GROWTH.</text>
+  </g>
+</svg>
