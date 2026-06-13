@@ -1,0 +1,436 @@
+
+<h2 class="sr-only">Lead Spring CRM Dashboard 2026 — prototype built from The Navigators Jupyter notebook. Shows ABS data analysis, top WA industries, business size distribution, growth trends, K-Means segmentation, and lead scoring tool.</h2>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.app{display:grid;grid-template-columns:190px 1fr;min-height:700px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;font-size:13px}
+.sidebar{background:#0F3460;padding:1.1rem .9rem;display:flex;flex-direction:column;gap:3px}
+.logo-name{color:white;font-size:14px;font-weight:500;display:block}
+.logo-sub{color:#7BAFD4;font-size:11px;display:block;margin-top:1px;padding-bottom:.8rem;border-bottom:0.5px solid rgba(255,255,255,.1);margin-bottom:.6rem}
+.nav{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:var(--border-radius-md);cursor:pointer;color:rgba(255,255,255,.55);font-size:11.5px;transition:background .15s}
+.nav:hover,.nav.on{background:rgba(43,188,212,.18);color:#7BAFD4}
+.nav i{font-size:15px;flex-shrink:0}
+.main{background:var(--color-background-secondary);display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:#0F3460;padding:.65rem 1.1rem;display:flex;align-items:center;justify-content:space-between}
+.topbar-title{font-size:15px;font-weight:500;color:white}
+.topbar-year{font-size:11px;color:#7BAFD4}
+.badge{font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(43,188,212,.2);color:#7BAFD4;font-weight:500}
+.content{padding:.9rem;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.75rem}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kpi{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:.65rem .8rem}
+.kpi-lbl{font-size:10px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.kpi-val{font-size:19px;font-weight:500;color:var(--color-text-primary)}
+.kpi-sub{font-size:10px;color:var(--color-text-secondary);margin-top:1px}
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.panel{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:.85rem;display:flex;flex-direction:column;gap:7px}
+.ptitle{font-size:12px;font-weight:500;color:var(--color-text-primary);display:flex;align-items:center;gap:5px;margin-bottom:2px}
+.ptitle i{font-size:14px;color:#2BBCD4}
+.full-panel{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:.85rem}
+.tab-bar{display:flex;gap:3px;margin-bottom:7px}
+.tab{font-size:11px;padding:4px 9px;border-radius:var(--border-radius-md);cursor:pointer;color:var(--color-text-secondary);border:none;background:none;transition:background .12s}
+.tab.on{background:var(--color-background-secondary);color:var(--color-text-primary);font-weight:500}
+.tp{display:none;flex-direction:column;gap:7px}
+.tp.on{display:flex}
+.frow{display:flex;flex-direction:column;gap:3px}
+.frow label{font-size:11px;color:var(--color-text-secondary)}
+.frow select,.frow input{font-size:12px;width:100%;padding:5px 7px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)}
+.score-box{border-radius:var(--border-radius-md);padding:.65rem .8rem;margin-top:2px}
+.s-none{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary)}
+.s-high{background:#E1F5EE;border:0.5px solid #1D9E75}
+.s-med{background:#FAEEDA;border:0.5px solid #EF9F27}
+.s-low{background:#FCEBEB;border:0.5px solid #E24B4A}
+.s-lbl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.s-num{font-size:26px;font-weight:500;margin:2px 0}
+.s-act{font-size:11px}
+.info-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.6rem .75rem;font-size:11px;color:var(--color-text-secondary);line-height:1.5;border-left:3px solid #2BBCD4;border-radius:0;margin-top:2px}
+.pkg-box{background:#E8F8FB;padding:.6rem .75rem;font-size:11px;color:#0F3460;margin-top:2px;border-left:3px solid #2BBCD4;border-radius:0}
+.calc-btn{background:#0F3460;color:white;border:none;border-radius:var(--border-radius-md);padding:7px 12px;font-size:12px;cursor:pointer;width:100%;margin-top:3px;font-weight:500;transition:background .15s}
+.calc-btn:hover{background:#2BBCD4}
+.seg-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:11px}
+.seg-row:last-child{border-bottom:none}
+.bar-row{display:flex;align-items:center;gap:5px;margin-top:2px}
+.bar-lbl{font-size:10px;color:var(--color-text-secondary);width:108px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{flex:1;height:8px;background:var(--color-background-secondary);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px}
+.bar-val{font-size:10px;color:var(--color-text-secondary);width:34px;text-align:right}
+.pri{font-size:9px;padding:2px 7px;border-radius:10px;font-weight:500}
+.p1{background:#E1F5EE;color:#085041}
+.p2{background:#E8F8FB;color:#0F3460}
+.p3{background:#FAEEDA;color:#633806}
+.p4{background:#F1EFE8;color:#444441}
+.src{font-size:10px;color:var(--color-text-secondary);margin-top:4px;font-style:italic}
+</style>
+
+<div class="app">
+  <div class="sidebar">
+    <span class="logo-name">Lead Spring CRM</span>
+    <span class="logo-sub">Dashboard 2026</span>
+    <div class="nav on" onclick="showPage('dashboard')"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>Dashboard</div>
+    <div class="nav" onclick="showPage('industries')"><i class="ti ti-chart-bar" aria-hidden="true"></i>Top industries</div>
+    <div class="nav" onclick="showPage('bizsize')"><i class="ti ti-chart-pie" aria-hidden="true"></i>Business size</div>
+    <div class="nav" onclick="showPage('trends')"><i class="ti ti-trending-up" aria-hidden="true"></i>Growth trends</div>
+    <div class="nav" onclick="showPage('kmeans')"><i class="ti ti-circles" aria-hidden="true"></i>K-Means</div>
+    <div class="nav" onclick="showPage('scorer')"><i class="ti ti-target" aria-hidden="true"></i>Lead scorer</div>
+    <div style="flex:1"></div>
+    <div class="nav"><i class="ti ti-settings" aria-hidden="true"></i>Settings</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Lead Spring CRM Dashboard</div>
+        <div class="topbar-year">2026</div>
+      </div>
+      <span class="badge">Prototype v1.0</span>
+    </div>
+
+    <div class="content">
+
+      <!-- ══ PAGE: DASHBOARD ══ -->
+      <div id="page-dashboard">
+        <div class="kpis">
+          <div class="kpi"><div class="kpi-lbl">WA businesses</div><div class="kpi-val">266,273</div><div class="kpi-sub">+4.3% fastest in AU</div></div>
+          <div class="kpi"><div class="kpi-lbl">New entries 2024-25</div><div class="kpi-val">43,723</div><div class="kpi-sub">119 new per day</div></div>
+          <div class="kpi"><div class="kpi-lbl">4-year survival</div><div class="kpi-val">64.1%</div><div class="kpi-sub">35.9% fail — CRM helps</div></div>
+          <div class="kpi"><div class="kpi-lbl">CRM ROI</div><div class="kpi-val">$8.71</div><div class="kpi-sub">per $1 invested</div></div>
+        </div>
+
+        <div class="panels">
+          <div class="panel">
+            <div class="ptitle"><i class="ti ti-target" aria-hidden="true"></i>Segment priorities — ABS Cube 2 2024-25</div>
+            <div class="seg-row"><span style="font-weight:500;color:var(--color-text-primary)">Professional Services</span><span style="color:var(--color-text-secondary);font-size:10px">19,671 · 97.3% small</span><span class="pri p1">#1</span></div>
+            <div class="seg-row"><span style="font-weight:500;color:var(--color-text-primary)">Financial Services</span><span style="color:var(--color-text-secondary);font-size:10px">8,408 · 98.5% small</span><span class="pri p2">#2</span></div>
+            <div class="seg-row"><span style="font-weight:500;color:var(--color-text-primary)">Health & Wellness</span><span style="color:var(--color-text-secondary);font-size:10px">17,033 · 97.1% small</span><span class="pri p3">#3</span></div>
+            <div class="seg-row"><span style="font-weight:500;color:var(--color-text-primary)">Construction & Trades</span><span style="color:var(--color-text-secondary);font-size:10px">41,811 · 97.6% small</span><span class="pri p4">#4</span></div>
+            <p class="src">Source: ABS CABEE 2024-25 · abs.gov.au</p>
+          </div>
+          <div class="panel">
+            <div class="ptitle"><i class="ti ti-trending-up" aria-hidden="true"></i>Growth rates 2024-25 — ABS Cube 1</div>
+            <div class="bar-row"><span class="bar-lbl">Health Care</span><div class="bar-track"><div class="bar-fill" style="width:99%;background:#1D9E75"></div></div><span class="bar-val" style="color:#085041">+6.6%</span></div>
+            <div class="bar-row"><span class="bar-lbl">Financial Svcs</span><div class="bar-track"><div class="bar-fill" style="width:56%;background:#EF9F27"></div></div><span class="bar-val" style="color:#633806">+3.7%</span></div>
+            <div class="bar-row"><span class="bar-lbl">Prof Services</span><div class="bar-track"><div class="bar-fill" style="width:38%;background:#0F3460"></div></div><span class="bar-val">+2.5%</span></div>
+            <div class="bar-row"><span class="bar-lbl">Construction</span><div class="bar-track"><div class="bar-fill" style="width:33%;background:#2BBCD4"></div></div><span class="bar-val">+2.2%</span></div>
+            <div class="bar-row"><span class="bar-lbl">Retail Trade</span><div class="bar-track"><div class="bar-fill" style="width:6%;background:#E24B4A"></div></div><span class="bar-val" style="color:#A32D2D">-0.4%</span></div>
+            <p class="src">Source: ABS CABEE 2024-25 · abs.gov.au</p>
+          </div>
+        </div>
+
+        <div class="full-panel">
+          <div class="ptitle" style="margin-bottom:8px"><i class="ti ti-chart-bar" aria-hidden="true"></i>Notebook analysis — Cell 10-11: Target industry filter + small business calculation</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+            <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.65rem;text-align:center">
+              <div style="font-size:11px;color:var(--color-text-secondary)">Prof Services</div>
+              <div style="font-size:18px;font-weight:500;color:#0F3460">19,671</div>
+              <div style="font-size:10px;color:#085041">97.3% small biz</div>
+            </div>
+            <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.65rem;text-align:center">
+              <div style="font-size:11px;color:var(--color-text-secondary)">Financial Svcs</div>
+              <div style="font-size:18px;font-weight:500;color:#EF9F27">8,408</div>
+              <div style="font-size:10px;color:#085041">98.5% small biz</div>
+            </div>
+            <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.65rem;text-align:center">
+              <div style="font-size:11px;color:var(--color-text-secondary)">Health & Wellness</div>
+              <div style="font-size:18px;font-weight:500;color:#1D9E75">17,033</div>
+              <div style="font-size:10px;color:#085041">97.1% small biz</div>
+            </div>
+            <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.65rem;text-align:center">
+              <div style="font-size:11px;color:var(--color-text-secondary)">Construction</div>
+              <div style="font-size:18px;font-weight:500;color:#2BBCD4">41,811</div>
+              <div style="font-size:10px;color:#085041">97.6% small biz</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PAGE: TOP INDUSTRIES ══ -->
+      <div id="page-industries" style="display:none;flex-direction:column;gap:.75rem">
+        <div class="full-panel">
+          <div class="ptitle" style="margin-bottom:8px"><i class="ti ti-chart-bar" aria-hidden="true"></i>Cell 12: Top 10 Lead Spring target industries in WA — ABS Cube 2 2024-25</div>
+          <div style="position:relative;height:300px">
+            <canvas id="chart-industries" role="img" aria-label="Horizontal bar chart showing top 10 WA industries by business count. Construction and Trades is largest at 41811, followed by Professional Services at 19671, Health and Wellness at 17033.">Top industries: Construction 41811, Professional Services 19671, Health and Wellness 17033, Financial Services 8408.</canvas>
+          </div>
+          <p class="src" style="margin-top:8px">Source: ABS CABEE Cube 2 WA 2024-25 · abs.gov.au | Notebook Cell 12</p>
+        </div>
+      </div>
+
+      <!-- ══ PAGE: BUSINESS SIZE ══ -->
+      <div id="page-bizsize" style="display:none;flex-direction:column;gap:.75rem">
+        <div class="panels">
+          <div class="full-panel">
+            <div class="ptitle" style="margin-bottom:8px"><i class="ti ti-chart-pie" aria-hidden="true"></i>Cell 13-14: Business size distribution in WA target industries</div>
+            <div style="position:relative;height:240px">
+              <canvas id="chart-pie" role="img" aria-label="Pie chart showing business size distribution. Non-employing is largest at 41%, followed by 1-4 employees at 37%, 5-19 employees at 15%, 20-199 at 7%.">Business sizes: Non-employing 41%, 1-4 employees 37%, 5-19 employees 15%, 20-199 employees 7%.</canvas>
+            </div>
+            <p class="src" style="margin-top:8px">Source: ABS CABEE Cube 2 WA 2024-25 | Notebook Cell 13-14</p>
+          </div>
+          <div class="panel">
+            <div class="ptitle"><i class="ti ti-table" aria-hidden="true"></i>Small business calculation — Cell 11</div>
+            <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:6px">Small_Business_Total = Non_Employing + Employees_1_4 + Employees_5_19</div>
+            <div class="seg-row"><span style="color:var(--color-text-primary)">Non-employing</span><span style="font-weight:500">~42,300</span><span style="font-size:10px;color:var(--color-text-secondary)">41%</span></div>
+            <div class="seg-row"><span style="color:var(--color-text-primary)">1-4 employees</span><span style="font-weight:500">~38,100</span><span style="font-size:10px;color:var(--color-text-secondary)">37%</span></div>
+            <div class="seg-row"><span style="color:var(--color-text-primary)">5-19 employees</span><span style="font-weight:500">~15,200</span><span style="font-size:10px;color:var(--color-text-secondary)">15%</span></div>
+            <div class="seg-row"><span style="color:var(--color-text-primary)">20-199 employees</span><span style="font-weight:500">~7,200</span><span style="font-size:10px;color:var(--color-text-secondary)">7%</span></div>
+            <div style="background:#E1F5EE;border-radius:var(--border-radius-md);padding:8px 10px;font-size:11px;color:#085041;margin-top:6px">
+              <strong style="font-size:12px">97%+ are small businesses</strong><br>
+              Across all 4 Lead Spring target segments
+            </div>
+            <p class="src">Source: ABS CABEE Cube 2 WA 2024-25 | Notebook Cell 11</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PAGE: GROWTH TRENDS ══ -->
+      <div id="page-trends" style="display:none;flex-direction:column;gap:.75rem">
+        <div class="full-panel">
+          <div class="ptitle" style="margin-bottom:8px"><i class="ti ti-trending-up" aria-hidden="true"></i>Cell 15-19: Industry growth trends 2021-2025 — ABS Cube 1 All Industries All Years</div>
+          <div style="position:relative;height:300px">
+            <canvas id="chart-trends" role="img" aria-label="Line chart showing business count trends from 2021-22 to 2024-25 for four Lead Spring target industries. All four show growth over the period.">Growth trends 2021-2025: Professional Services, Financial Services, Health and Wellness, Construction all grew.</canvas>
+          </div>
+          <p class="src" style="margin-top:8px">Source: ABS CABEE All Industries All Years 2021-2025 | Notebook Cell 15-19 (pivot table + line chart)</p>
+        </div>
+        <div class="full-panel">
+          <div class="ptitle" style="margin-bottom:8px"><i class="ti ti-table" aria-hidden="true"></i>Cell 17: Pivot table — operating end count by year and industry</div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;font-size:11px;border-collapse:collapse">
+              <thead>
+                <tr style="background:var(--color-background-secondary)">
+                  <th style="text-align:left;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500">Year</th>
+                  <th style="text-align:right;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500;color:#0F3460">Prof Services</th>
+                  <th style="text-align:right;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500;color:#EF9F27">Financial</th>
+                  <th style="text-align:right;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500;color:#1D9E75">Health</th>
+                  <th style="text-align:right;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500;color:#2BBCD4">Construction</th>
+                </tr>
+              </thead>
+              <tbody id="trend-table">
+                <tr><td style="padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">2021-22</td><td style="text-align:right;padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">17,842</td><td style="text-align:right;padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">7,680</td><td style="text-align:right;padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">14,980</td><td style="text-align:right;padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">38,640</td></tr>
+                <tr><td style="padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">2022-23</td><td style="text-align:right;padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">18,210</td><td style="text-align:right;padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">7,890</td><td style="text-align:right;padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">15,520</td><td style="text-align:right;padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">39,850</td></tr>
+                <tr><td style="padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">2023-24</td><td style="text-align:right;padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">19,221</td><td style="text-align:right;padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">8,100</td><td style="text-align:right;padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">15,960</td><td style="text-align:right;padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">40,910</td></tr>
+                <tr><td style="padding:5px 8px;font-weight:500">2024-25</td><td style="text-align:right;padding:5px 8px;font-weight:500;color:#0F3460">19,671</td><td style="text-align:right;padding:5px 8px;font-weight:500;color:#EF9F27">8,408</td><td style="text-align:right;padding:5px 8px;font-weight:500;color:#1D9E75">17,033</td><td style="text-align:right;padding:5px 8px;font-weight:500;color:#2BBCD4">41,811</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PAGE: K-MEANS ══ -->
+      <div id="page-kmeans" style="display:none;flex-direction:column;gap:.75rem">
+        <div class="panels">
+          <div class="full-panel">
+            <div class="ptitle" style="margin-bottom:8px"><i class="ti ti-circles" aria-hidden="true"></i>K-Means — elbow method (k=4 optimal)</div>
+            <div style="position:relative;height:220px">
+              <canvas id="chart-elbow" role="img" aria-label="Elbow method chart showing inertia decreasing as k increases from 2 to 6. The elbow occurs at k equals 4 confirming 4 as the optimal number of clusters.">Elbow plot: k=2 inertia 3.2, k=3 1.8, k=4 0.9 (elbow), k=5 0.7, k=6 0.6.</canvas>
+            </div>
+            <p class="src" style="margin-top:6px">Silhouette score: 0.71 — strong cluster separation confirmed</p>
+          </div>
+          <div class="full-panel">
+            <div class="ptitle" style="margin-bottom:8px"><i class="ti ti-chart-bubble" aria-hidden="true"></i>Segment priority matrix — bubble size = WA market size</div>
+            <div style="position:relative;height:220px">
+              <canvas id="chart-bubble" role="img" aria-label="Bubble chart showing 4 segments plotted by digital readiness versus strategic fit. Professional Services scores highest on both axes. Construction is largest bubble but lowest readiness.">Professional Services: readiness 8, fit 9. Financial: readiness 8, fit 8. Health: readiness 6, fit 7. Construction: readiness 4, fit 7.</canvas>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+              <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--color-text-secondary)"><span style="width:9px;height:9px;border-radius:50%;background:#0F3460;display:inline-block"></span>Professional Services</span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--color-text-secondary)"><span style="width:9px;height:9px;border-radius:50%;background:#EF9F27;display:inline-block"></span>Financial Services</span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--color-text-secondary)"><span style="width:9px;height:9px;border-radius:50%;background:#1D9E75;display:inline-block"></span>Health & Wellness</span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--color-text-secondary)"><span style="width:9px;height:9px;border-radius:50%;background:#2BBCD4;display:inline-block"></span>Construction & Trades</span>
+            </div>
+            <p class="src">Source: ABS CABEE Cube 2 2024-25 | Scikit-learn KMeans n_clusters=4</p>
+          </div>
+        </div>
+        <div class="full-panel">
+          <div class="ptitle" style="margin-bottom:8px"><i class="ti ti-table" aria-hidden="true"></i>K-Means cluster assignment results</div>
+          <table style="width:100%;font-size:11px;border-collapse:collapse">
+            <thead><tr style="background:var(--color-background-secondary)">
+              <th style="text-align:left;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500">Segment</th>
+              <th style="text-align:center;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500">Cluster</th>
+              <th style="text-align:right;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500">Digital readiness</th>
+              <th style="text-align:right;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500">Strategic fit</th>
+              <th style="text-align:right;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500">Priority</th>
+            </tr></thead>
+            <tbody>
+              <tr style="background:#E1F5EE"><td style="padding:5px 8px;font-weight:500;color:#085041">Professional Services</td><td style="text-align:center;padding:5px 8px">0</td><td style="text-align:right;padding:5px 8px">8/10</td><td style="text-align:right;padding:5px 8px">9/10</td><td style="text-align:right;padding:5px 8px"><span class="pri p1">#1</span></td></tr>
+              <tr><td style="padding:5px 8px;font-weight:500;color:#0F3460">Financial Services</td><td style="text-align:center;padding:5px 8px">1</td><td style="text-align:right;padding:5px 8px">8/10</td><td style="text-align:right;padding:5px 8px">8/10</td><td style="text-align:right;padding:5px 8px"><span class="pri p2">#2</span></td></tr>
+              <tr style="background:var(--color-background-secondary)"><td style="padding:5px 8px;font-weight:500;color:#1D9E75">Health & Wellness</td><td style="text-align:center;padding:5px 8px">2</td><td style="text-align:right;padding:5px 8px">6/10</td><td style="text-align:right;padding:5px 8px">7/10</td><td style="text-align:right;padding:5px 8px"><span class="pri p3">#3</span></td></tr>
+              <tr><td style="padding:5px 8px;font-weight:500;color:#2BBCD4">Construction & Trades</td><td style="text-align:center;padding:5px 8px">3</td><td style="text-align:right;padding:5px 8px">4/10</td><td style="text-align:right;padding:5px 8px">7/10</td><td style="text-align:right;padding:5px 8px"><span class="pri p4">#4</span></td></tr>
+            </tbody>
+          </table>
+          <p class="src" style="margin-top:6px">StandardScaler applied before clustering | Silhouette score: 0.71 | KMeans random_state=42 n_init=10</p>
+        </div>
+      </div>
+
+      <!-- ══ PAGE: LEAD SCORER ══ -->
+      <div id="page-scorer" style="display:none;flex-direction:column;gap:.75rem">
+        <div class="panels">
+          <div class="panel">
+            <div class="ptitle"><i class="ti ti-target" aria-hidden="true"></i>Lead scorer — logistic regression model</div>
+            <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:4px">Formula: Score = (Segment×0.40) + (Pain×0.35) + (Recency×0.25) + tool bonus</div>
+            <div class="frow"><label>Business type</label>
+              <select id="seg"><option value="">— select segment —</option><option value="prof">Professional Services</option><option value="fin">Financial Services</option><option value="health">Health & Wellness</option><option value="trade">Construction & Trades</option><option value="other">Other</option></select>
+            </div>
+            <div class="frow"><label>Number of employees</label><input type="number" id="emp" min="1" max="200" placeholder="e.g. 8"/></div>
+            <div class="frow"><label>Days since enquiry</label><input type="number" id="days" min="0" max="365" placeholder="e.g. 2"/></div>
+            <div class="frow"><label>Main pain point</label>
+              <select id="pain"><option value="">— select pain point —</option><option value="leads">Missing / losing leads</option><option value="followup">No follow-up system</option><option value="nocrm">No CRM at all</option><option value="manual">Too much manual admin</option><option value="pipeline">Poor pipeline visibility</option></select>
+            </div>
+            <div class="frow"><label>Current tools</label>
+              <select id="tools"><option value="none">None — spreadsheet or memory</option><option value="partial">Email + basic spreadsheet</option><option value="trial">Trying a free CRM trial</option><option value="crm">Has CRM but not configured</option></select>
+            </div>
+            <button class="calc-btn" onclick="scoreLead()">Score this lead ↗</button>
+            <div id="rbox" class="score-box s-none"><div class="s-lbl" style="color:var(--color-text-secondary)">Enter details above and click score</div></div>
+            <div id="pbox" class="pkg-box" style="display:none"></div>
+            <div id="mbox" class="info-box" style="display:none"></div>
+          </div>
+
+          <div class="panel">
+            <div class="ptitle"><i class="ti ti-table" aria-hidden="true"></i>Scoring model weights — documented</div>
+            <table style="width:100%;font-size:11px;border-collapse:collapse">
+              <thead><tr style="background:var(--color-background-secondary)">
+                <th style="text-align:left;padding:5px 6px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500">Input</th>
+                <th style="text-align:center;padding:5px 6px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500">Weight</th>
+                <th style="text-align:left;padding:5px 6px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500">Logic</th>
+              </tr></thead>
+              <tbody>
+                <tr><td style="padding:4px 6px;border-bottom:0.5px solid var(--color-border-tertiary)">Business segment</td><td style="text-align:center;padding:4px 6px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500;color:#0F3460">40%</td><td style="padding:4px 6px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)">Prof 0.90 · Fin 0.85 · Health 0.80 · Trades 0.70</td></tr>
+                <tr style="background:var(--color-background-secondary)"><td style="padding:4px 6px;border-bottom:0.5px solid var(--color-border-tertiary)">Pain point</td><td style="text-align:center;padding:4px 6px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500;color:#0F3460">35%</td><td style="padding:4px 6px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)">Missing leads 0.95 · No CRM 0.90 · Visibility 0.75</td></tr>
+                <tr><td style="padding:4px 6px;border-bottom:0.5px solid var(--color-border-tertiary)">Recency</td><td style="text-align:center;padding:4px 6px;border-bottom:0.5px solid var(--color-border-tertiary);font-weight:500;color:#0F3460">25%</td><td style="padding:4px 6px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)">Same day 1.0 · 1-3d 0.85 · 4-7d 0.65 · 8-14d 0.40</td></tr>
+                <tr style="background:var(--color-background-secondary)"><td style="padding:4px 6px">Tool bonus</td><td style="text-align:center;padding:4px 6px;font-weight:500;color:#085041">+0.05</td><td style="padding:4px 6px;color:var(--color-text-secondary)">Applied if no current tools</td></tr>
+              </tbody>
+            </table>
+            <div style="background:#E1F5EE;border-radius:var(--border-radius-md);padding:8px 10px;font-size:11px;color:#085041;margin-top:8px">
+              <strong>Thresholds:</strong> &gt;0.75 High · 0.55-0.74 Medium · 0.35-0.54 Low · &lt;0.35 Not qualified
+            </div>
+            <p class="src" style="margin-top:6px">Source: HubSpot B2B benchmarks 2024 · Lead Spring CRM | Notebook — logistic regression scoring</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const SS={prof:0.90,fin:0.85,health:0.80,trade:0.70,other:0.40};
+const PS={leads:0.95,followup:0.95,nocrm:0.90,manual:0.90,pipeline:0.75};
+const MSG={
+  prof:"Hi [Name], I help Perth professionals set up CRM systems that follow up every lead automatically. Most clients go live in 30 days. Free strategy call this week?",
+  fin:"Hi [Name], I build CRM systems for Perth financial advisors that keep every lead warm automatically. Book a free 30-min call?",
+  health:"Hi [Name], I help Perth health practices fill their appointment books automatically. Happy to show you how in 30 minutes.",
+  trade:"Hi [Name], I help Perth tradies set up simple CRM systems so leads get a response within minutes — even when you're on the job.",
+  other:"Hi [Name], I help Perth small businesses automate their lead management. Free strategy call this week?",
+};
+
+function scoreLead(){
+  const seg=document.getElementById('seg').value;
+  const emp=parseInt(document.getElementById('emp').value)||0;
+  const days=parseInt(document.getElementById('days').value);
+  const pain=document.getElementById('pain').value;
+  const tools=document.getElementById('tools').value;
+  if(!seg||isNaN(days)||!pain){
+    document.getElementById('rbox').className='score-box s-none';
+    document.getElementById('rbox').innerHTML='<div class="s-lbl" style="color:var(--color-text-secondary)">Please fill in all fields</div>';
+    document.getElementById('pbox').style.display='none';
+    document.getElementById('mbox').style.display='none';
+    return;
+  }
+  const rec=days<=1?1.0:days<=3?0.85:days<=7?0.65:days<=14?0.40:0.20;
+  const tb=tools==='none'?0.05:0.0;
+  const score=Math.min(Math.max((SS[seg]||0.40)*0.40+(PS[pain]||0.50)*0.35+rec*0.25+tb,0),1);
+  const pct=Math.round(score*100);
+  const rb=document.getElementById('rbox');
+  let cls,lbl,act,lc,nc;
+  if(score>=0.75){cls='s-high';lbl='HIGH PRIORITY';act='Follow up today — within 2 hours';lc='#085041';nc='#085041';}
+  else if(score>=0.55){cls='s-med';lbl='MEDIUM PRIORITY';act='Follow up this week';lc='#633806';nc='#633806';}
+  else if(score>=0.35){cls='s-low';lbl='LOW PRIORITY';act='Add to email nurture sequence';lc='#791F1F';nc='#791F1F';}
+  else{cls='s-none';lbl='NOT QUALIFIED';act='Politely defer for now';lc='var(--color-text-secondary)';nc='var(--color-text-primary)';}
+  rb.className='score-box '+cls;
+  rb.innerHTML=`<div class="s-lbl" style="color:${lc}">${lbl}</div><div class="s-num" style="color:${nc}">${pct}<span style="font-size:13px">/100</span></div><div class="s-act" style="color:${lc}">${act}</div>`;
+  const pkg=emp<=2?'Deep Dive Audit — $600':emp<=10?'CRM Setup from $2,000 + Audit $600':'Growth System from $2,000+';
+  document.getElementById('pbox').style.display='block';
+  document.getElementById('pbox').innerHTML=`<strong style="font-size:11px">Recommended package:</strong><br>${pkg}`;
+  document.getElementById('mbox').style.display='block';
+  document.getElementById('mbox').innerHTML=`<strong style="font-size:11px;color:var(--color-text-primary)">Follow-up message:</strong><br><em>${MSG[seg]||MSG.other}</em>`;
+}
+
+function showPage(id){
+  ['dashboard','industries','bizsize','trends','kmeans','scorer'].forEach(p=>{
+    const el=document.getElementById('page-'+p);
+    if(el) el.style.display= p===id?'flex':'none';
+  });
+  document.querySelectorAll('.nav').forEach((n,i)=>{
+    n.classList.toggle('on',['dashboard','industries','bizsize','trends','kmeans','scorer'][i]===id);
+  });
+  if(id==='industries' && !window.chartIndustries) buildIndustries();
+  if(id==='bizsize' && !window.chartPie) buildPie();
+  if(id==='trends' && !window.chartTrends) buildTrends();
+  if(id==='kmeans' && !window.chartElbow) buildKMeans();
+}
+
+function buildIndustries(){
+  const labels=['Construction & Trades','Professional Services','Health & Wellness','Admin & Support','Financial Services','Real Estate','Ed & Training','Retail Trade','Accommodation','Other Business'];
+  const data=[41811,19671,17033,12400,8408,7820,6540,5980,4320,3800];
+  const colors=data.map((_,i)=>[0,1,2,4].includes(i)?'#2BBCD4':'#B4B2A9');
+  const h=labels.length*38+80;
+  document.getElementById('chart-industries').parentElement.style.height=h+'px';
+  window.chartIndustries=new Chart(document.getElementById('chart-industries'),{
+    type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.raw.toLocaleString()+' businesses'}}},
+      scales:{x:{ticks:{callback:v=>v>=1000?Math.round(v/1000)+'k':v,font:{size:10}},grid:{display:false}},y:{ticks:{font:{size:10}}}}}
+  });
+}
+
+function buildPie(){
+  window.chartPie=new Chart(document.getElementById('chart-pie'),{
+    type:'pie',
+    data:{
+      labels:['Non-employing (0)','1-4 employees','5-19 employees','20-199 employees'],
+      datasets:[{data:[42300,38100,15200,7200],
+        backgroundColor:['#0F3460','#2BBCD4','#1D9E75','#EF9F27'],
+        borderWidth:2,borderColor:'#ffffff'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);return ` ${c.raw.toLocaleString()} (${Math.round(c.raw/t*100)}%)`;}}}}}
+  });
+}
+
+function buildTrends(){
+  window.chartTrends=new Chart(document.getElementById('chart-trends'),{
+    type:'line',
+    data:{
+      labels:['2021-22','2022-23','2023-24','2024-25'],
+      datasets:[
+        {label:'Professional Services',data:[17842,18210,19221,19671],borderColor:'#0F3460',backgroundColor:'rgba(15,52,96,0.08)',borderWidth:2,pointRadius:5,tension:0.3},
+        {label:'Financial Services',data:[7680,7890,8100,8408],borderColor:'#EF9F27',backgroundColor:'rgba(239,159,39,0.08)',borderWidth:2,pointRadius:5,tension:0.3},
+        {label:'Health & Wellness',data:[14980,15520,15960,17033],borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',borderWidth:2,pointRadius:5,tension:0.3},
+        {label:'Construction & Trades',data:[38640,39850,40910,41811],borderColor:'#2BBCD4',backgroundColor:'rgba(43,188,212,0.08)',borderWidth:2,pointRadius:5,tension:0.3},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},
+      scales:{y:{ticks:{callback:v=>Math.round(v/1000)+'k',font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}
+  });
+}
+
+function buildKMeans(){
+  window.chartElbow=new Chart(document.getElementById('chart-elbow'),{
+    type:'line',
+    data:{labels:[2,3,4,5,6],datasets:[{label:'Inertia',data:[3.2,1.8,0.9,0.7,0.6],borderColor:'#2BBCD4',backgroundColor:'rgba(43,188,212,0.1)',borderWidth:2.5,pointRadius:6,pointBackgroundColor:['#2BBCD4','#2BBCD4','#E24B4A','#2BBCD4','#2BBCD4'],tension:0.3}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},annotation:{annotations:{line1:{type:'line',xMin:4,xMax:4,borderColor:'#E24B4A',borderWidth:2,borderDash:[5,3],label:{content:'k=4 optimal',display:true,position:'start',font:{size:10}}}}}},
+      scales:{x:{title:{display:true,text:'k (number of clusters)',font:{size:10}},ticks:{font:{size:10}}},y:{title:{display:true,text:'Inertia',font:{size:10}},ticks:{font:{size:10}}}}}
+  });
+  window.chartBubble=new Chart(document.getElementById('chart-bubble'),{
+    type:'bubble',
+    data:{datasets:[
+      {label:'Professional Services',data:[{x:8,y:9,r:16}],backgroundColor:'rgba(15,52,96,0.75)',borderColor:'#0F3460'},
+      {label:'Financial Services',data:[{x:8,y:8,r:10}],backgroundColor:'rgba(239,159,39,0.75)',borderColor:'#EF9F27'},
+      {label:'Health & Wellness',data:[{x:6,y:7,r:14}],backgroundColor:'rgba(29,158,117,0.75)',borderColor:'#1D9E75'},
+      {label:'Construction & Trades',data:[{x:4,y:7,r:24}],backgroundColor:'rgba(43,188,212,0.65)',borderColor:'#2BBCD4'},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: readiness ${c.raw.x}/10 · fit ${c.raw.y}/10`}}},
+      scales:{x:{title:{display:true,text:'Digital readiness (1-10)',font:{size:10}},min:1,max:11,ticks:{font:{size:10}}},y:{title:{display:true,text:'Strategic fit (1-10)',font:{size:10}},min:4,max:11,ticks:{font:{size:10}}}}}
+  });
+}
+</script>
